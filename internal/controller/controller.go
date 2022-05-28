@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 
+	"github.com/VictorPrado99/poc-csv-uploader/internal/logic"
 	"github.com/gorilla/mux"
 )
 
@@ -12,6 +14,8 @@ const (
 	GET  = "GET"
 	POST = "POST"
 	PUT  = "PUT"
+
+	TEMP_DIR = "./temp-files"
 )
 
 // Method who will setup the router of this controller
@@ -42,9 +46,12 @@ func uploadCsv(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
 
-	// Create a temporary file within our temp-images directory that follows
+	// Create a directory if needed
+	os.MkdirAll(TEMP_DIR, os.ModePerm)
+
+	// Create a temporary file within our temp-file directory that follows
 	// a particular naming pattern
-	tempFile, err := ioutil.TempFile("temp-files", "upload-*.csv")
+	tempFile, err := ioutil.TempFile(TEMP_DIR, "upload-*.csv")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -58,6 +65,9 @@ func uploadCsv(w http.ResponseWriter, r *http.Request) {
 	}
 	// write this byte array to our temporary file
 	tempFile.Write(fileBytes)
+
+	go logic.ProcessCsv(tempFile)
+
 	// return that we have successfully uploaded our file!
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
