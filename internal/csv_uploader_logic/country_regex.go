@@ -1,4 +1,4 @@
-package logic
+package csvuploaderlogic
 
 //var countriesRegex []*regexp.Regexp
 

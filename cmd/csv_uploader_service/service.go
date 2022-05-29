@@ -1,14 +1,14 @@
-package service
+package csvuploaderservice
 
 import (
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/VictorPrado99/poc-csv-uploader/internal/controller"
+	controller "github.com/VictorPrado99/poc-csv-uploader/internal/csv_uploader_controller"
 )
 
-func main() {
+func ServiceStart() {
 	router := controller.SetupRoutes()
 	srv := &http.Server{
 		Handler:      router,

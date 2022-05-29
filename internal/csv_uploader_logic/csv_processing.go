@@ -1,4 +1,4 @@
-package logic
+package csvuploaderlogic
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictorPrado99/poc-csv-uploader/pkg/api"
+	api "github.com/VictorPrado99/poc-csv-persistence/pkg/api"
 )
 
 func ProcessCsv(tempFile *os.File) {

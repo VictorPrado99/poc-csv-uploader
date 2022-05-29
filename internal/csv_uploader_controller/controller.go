@@ -1,4 +1,4 @@
-package controller
+package csvuploadercontroller
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/VictorPrado99/poc-csv-uploader/internal/logic"
+	logic "github.com/VictorPrado99/poc-csv-uploader/internal/csv_uploader_logic"
 	"github.com/gorilla/mux"
 )
 
