@@ -29,7 +29,6 @@ func SetupRoutes() *mux.Router {
 
 // Method to receive a CSV and made a async processing
 func uploadCsv(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("upload method called")
 	err := r.ParseMultipartForm(0)
 	if err != nil {
 		fmt.Println(err)
