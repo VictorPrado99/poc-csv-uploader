@@ -1,9 +1,13 @@
 package logic
 
 import (
+	"bytes"
 	"encoding/csv"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -15,12 +19,15 @@ import (
 
 func ProcessCsv(tempFile *os.File) {
 	tempFile, _ = os.Open(tempFile.Name())
+	defer tempFile.Close()
+	defer os.Remove(tempFile.Name())
 
 	fcsv := csv.NewReader(tempFile)
-	rs := make([]*api.Order, 0)
 	numWps := 100
 	jobs := make(chan []string, numWps)
 	res := make(chan *api.Order)
+
+	reprocess := make([]*api.Order, 0)
 
 	var wg sync.WaitGroup
 	worker := func(jobs <-chan []string, results chan<- *api.Order) {
@@ -30,7 +37,20 @@ func ProcessCsv(tempFile *os.File) {
 				if !ok {
 					return
 				}
-				results <- parseStruct(job)
+				result, err := parseStruct(job)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				errPost := callPersistenceApi(result)
+				if errPost != nil {
+					if errPost.Error() == "couldn't create resource" {
+						// If couldn't create resource save the object to retry later
+						results <- result
+					} else {
+						fmt.Println(errPost)
+					}
+				}
 			}
 		}
 	}
@@ -39,7 +59,7 @@ func ProcessCsv(tempFile *os.File) {
 	for w := 0; w < numWps; w++ {
 		wg.Add(1)
 		go func() {
-			// this line will exec when chan `res` processed output at line 107 (func worker: line 71)
+			// this line will exec when chan `res` processed output
 			defer wg.Done()
 			worker(jobs, res)
 		}()
@@ -66,18 +86,32 @@ func ProcessCsv(tempFile *os.File) {
 	}()
 
 	for r := range res {
-		rs = append(rs, r)
+		reprocess = append(reprocess, r)
 	}
 
-	fmt.Println("Count Concu ", len(rs))
-
+	fmt.Println(len(reprocess))
 }
 
-func callPersistenceApi(order *api.Order) {
+func callPersistenceApi(order *api.Order) error {
+	json, err := json.Marshal(order)
+	if err != nil {
+		return err
+	}
+	response, err := http.Post("https://localhost:9101/orders", "application/json", bytes.NewBuffer(json))
 
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != 201 {
+		err := errors.New("couldn't create resource")
+		return err
+	}
+
+	return nil
 }
 
-func parseStruct(data []string) *api.Order {
+func parseStruct(data []string) (*api.Order, error) {
 	id, _ := strconv.ParseInt(strings.TrimSpace(data[0]), 10, 32)
 	email := strings.TrimSpace(data[1])
 	phoneNumber := strings.TrimSpace(data[2])
@@ -92,10 +126,10 @@ func parseStruct(data []string) *api.Order {
 	country, err := getCountry(phoneNumber)
 
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
-	return api.CreateOrder(int(id), email, phoneNumber, float32(parcelWeight), date, country)
+	return api.CreateOrder(int(id), email, phoneNumber, float32(parcelWeight), date, country), nil
 }
 
 func getCountry(phoneNumber string) (string, error) {
