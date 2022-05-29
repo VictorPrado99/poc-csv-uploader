@@ -33,7 +33,7 @@ func ProcessCsv(tempFile *os.File) {
 	worker := func(jobs <-chan []string, results chan<- *api.Order) {
 		for {
 			select {
-			case job, ok := <-jobs: // you must check for readable state of the channel.
+			case job, ok := <-jobs: // Check for readable state of the channel.
 				if !ok {
 					return
 				}
@@ -44,12 +44,8 @@ func ProcessCsv(tempFile *os.File) {
 				}
 				errPost := callPersistenceApi(result)
 				if errPost != nil {
-					if errPost.Error() == "couldn't create resource" {
-						// If couldn't create resource save the object to retry later
-						results <- result
-					} else {
-						fmt.Println(errPost)
-					}
+					// If couldn't create resource save the object to retry later
+					results <- result
 				}
 			}
 		}
@@ -93,11 +89,11 @@ func ProcessCsv(tempFile *os.File) {
 }
 
 func callPersistenceApi(order *api.Order) error {
-	json, err := json.Marshal(order)
+	jsonData, err := json.Marshal(order)
 	if err != nil {
 		return err
 	}
-	response, err := http.Post("https://localhost:9101/orders", "application/json", bytes.NewBuffer(json))
+	response, err := http.Post("https://localhost:9101/orders", "application/json", bytes.NewBuffer(jsonData))
 
 	if err != nil {
 		return err
@@ -117,7 +113,7 @@ func parseStruct(data []string) (*api.Order, error) {
 	phoneNumber := strings.TrimSpace(data[2])
 	parcelWeight, err := strconv.ParseFloat(strings.TrimSpace(data[3]), 32)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, "when parsing", data[3])
 	}
 
 	year, month, day := time.Now().Date()

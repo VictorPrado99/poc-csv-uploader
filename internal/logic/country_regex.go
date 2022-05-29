@@ -2,7 +2,7 @@ package logic
 
 //var countriesRegex []*regexp.Regexp
 
-func Init() {
+func init() {
 	//	countriesRegex = make([]*regexp.Regexp, 0)
 
 	//countriesRegex = append(countriesRegex, regexp.MustCompile(``))
