@@ -37,7 +37,7 @@ func ProcessCsv(tempFile *os.File) {
 				if !ok {
 					return
 				}
-				result, err := parseStruct(job)
+				result, err := parseStruct(job) //Parse the line into a struct
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -59,15 +59,28 @@ func ProcessCsv(tempFile *os.File) {
 	}
 
 	go func() {
+		firstLine := true
 		for {
 			rStr, err := fcsv.Read()
+
+			// Ignore the first line, we don't need to process the header
+			if firstLine {
+				firstLine = false
+				continue
+			}
+
+			// Break the loop at the end of file
 			if err == io.EOF {
 				break
 			}
+
+			// If something has gone wrong stop the process
 			if err != nil {
 				fmt.Println("ERROR: ", err.Error())
 				break
 			}
+
+			// Ready the line to be processed by the worker
 			jobs <- rStr
 		}
 		close(jobs) // close jobs to signal workers that no more job are incoming.
@@ -79,27 +92,37 @@ func ProcessCsv(tempFile *os.File) {
 	}()
 
 	for r := range res {
-		orders = append(orders, r)
+		orders = append(orders, r) // Append all processed files into a slice
 	}
 
-	callPersistenceApi(orders)
+	// Call api to save the data into a database
+	errPost := callPersistenceApi(orders)
+
+	if errPost != nil {
+		fmt.Println(errPost)
+		return
+	}
+
 	fmt.Println("Processed ", len(orders))
 }
 
 func callPersistenceApi(orders []*api.Order) error {
-	jsonData, err := json.Marshal(orders)
+	jsonData, err := json.Marshal(orders) // Change the sclice into a json array
 	if err != nil {
 		return err
 	}
+	// Do the POST Request
 	response, err := http.Post("http://localhost:9001/orders", "application/json", bytes.NewBuffer(jsonData))
 
+	// Return generic error
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
+	// Check StatusCode for Created
 	if response.StatusCode != 201 {
-		err := errors.New("couldn't create resource")
+		err := errors.New("couldn't create resource") //New error for coudn't create
 		return err
 	}
 
@@ -129,15 +152,17 @@ func parseStruct(data []string) (*api.Order, error) {
 }
 
 func phoneNumberFormat(phoneNumber string) string {
-	phoneNumber = strings.ReplaceAll(strings.TrimSpace(phoneNumber), " ", "")
-	return "(" + phoneNumber[0:3] + ")" + phoneNumber[3:]
+	phoneNumber = strings.ReplaceAll(phoneNumber, " ", "") //Clear all spaces
+	return "(" + phoneNumber[0:3] + ")" + phoneNumber[3:]  // Create a format to regex recognize
 }
 
 func getCountry(phoneNumber string) (string, error) {
-	for country, reg := range countriesRegex {
-		if reg.MatchString(phoneNumber) {
-			return country, nil
+	for country, reg := range countriesRegex { // Cycle through regex list
+		if reg.MatchString(phoneNumber) { // When Match
+			return country, nil // Return the Country
 		}
 	}
+
+	// If couldn't find a match, return a error
 	return "", errors.New("country not found")
 }

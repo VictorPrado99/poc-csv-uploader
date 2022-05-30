@@ -4,6 +4,7 @@ import "regexp"
 
 var countriesRegex map[string]regexp.Regexp
 
+// init the dictionary of regex, who will be used to determine the country based on phone number
 func init() {
 	countriesRegex = make(map[string]regexp.Regexp)
 
