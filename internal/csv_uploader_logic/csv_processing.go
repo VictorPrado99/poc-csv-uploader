@@ -109,7 +109,8 @@ func callPersistenceApi(orders []*api.Order) error {
 func parseStruct(data []string) (*api.Order, error) {
 	id, _ := strconv.ParseInt(strings.TrimSpace(data[0]), 10, 32)
 	email := strings.TrimSpace(data[1])
-	phoneNumber := strings.TrimSpace(data[2])
+	phoneNumber := phoneNumberFormat(data[2])
+
 	parcelWeight, err := strconv.ParseFloat(strings.TrimSpace(data[3]), 32)
 	if err != nil {
 		return nil, err
@@ -127,6 +128,16 @@ func parseStruct(data []string) (*api.Order, error) {
 	return api.CreateOrder(int(id), email, phoneNumber, float32(parcelWeight), date, country), nil
 }
 
+func phoneNumberFormat(phoneNumber string) string {
+	phoneNumber = strings.ReplaceAll(strings.TrimSpace(phoneNumber), " ", "")
+	return "(" + phoneNumber[0:3] + ")" + phoneNumber[3:]
+}
+
 func getCountry(phoneNumber string) (string, error) {
-	return "Brazil", nil
+	for country, reg := range countriesRegex {
+		if reg.MatchString(phoneNumber) {
+			return country, nil
+		}
+	}
+	return "", errors.New("country not found")
 }
