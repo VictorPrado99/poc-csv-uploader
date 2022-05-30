@@ -152,7 +152,7 @@ func parseStruct(data []string) (*api.Order, error) {
 }
 
 func phoneNumberFormat(phoneNumber string) string {
-	phoneNumber = strings.ReplaceAll(phoneNumber, " ", "") //Clear all spaces
+	phoneNumber = strings.ReplaceAll(phoneNumber, " ", "") // Clear all spaces, was not needed. Just a nice touch
 	return "(" + phoneNumber[0:3] + ")" + phoneNumber[3:]  // Create a format to regex recognize
 }
 
