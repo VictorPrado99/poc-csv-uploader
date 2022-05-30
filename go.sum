@@ -1,4 +1,6 @@
 github.com/VictorPrado99/poc-csv-persistence/pkg/api v0.0.0-20220529211648-05f2fcd8e440 h1:iqZ2+GTwwq4oqUoamv/R02XoHWUqDbNUavF+FECIVvA=
 github.com/VictorPrado99/poc-csv-persistence/pkg/api v0.0.0-20220529211648-05f2fcd8e440/go.mod h1:qmfh10HrqOdWX9FTk+0sqvaLpnZYmcBvqlCBLorJT+4=
+github.com/VictorPrado99/poc-csv-persistence/pkg/api v0.0.0-20220530190752-58119ff4f1ce h1:l7MsIqK9v6FXZLQyu0nU1armqowvLylEhdUwkTyeeOs=
+github.com/VictorPrado99/poc-csv-persistence/pkg/api v0.0.0-20220530190752-58119ff4f1ce/go.mod h1:qmfh10HrqOdWX9FTk+0sqvaLpnZYmcBvqlCBLorJT+4=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=

@@ -27,7 +27,7 @@ func ProcessCsv(tempFile *os.File) {
 	jobs := make(chan []string, numWps)
 	res := make(chan *api.Order)
 
-	reprocess := make([]*api.Order, 0)
+	orders := make([]*api.Order, 0)
 
 	var wg sync.WaitGroup
 	worker := func(jobs <-chan []string, results chan<- *api.Order) {
@@ -42,11 +42,8 @@ func ProcessCsv(tempFile *os.File) {
 					fmt.Println(err)
 					return
 				}
-				errPost := callPersistenceApi(result)
-				if errPost != nil {
-					// If couldn't create resource save the object to retry later
-					results <- result
-				}
+				// Send the object to the channel after processed
+				results <- result
 			}
 		}
 	}
@@ -82,20 +79,22 @@ func ProcessCsv(tempFile *os.File) {
 	}()
 
 	for r := range res {
-		reprocess = append(reprocess, r)
+		orders = append(orders, r)
 	}
 
-	fmt.Println(len(reprocess))
+	callPersistenceApi(orders)
+	fmt.Println("Processed ", len(orders))
 }
 
-func callPersistenceApi(order *api.Order) error {
-	jsonData, err := json.Marshal(order)
+func callPersistenceApi(orders []*api.Order) error {
+	jsonData, err := json.Marshal(orders)
 	if err != nil {
 		return err
 	}
-	response, err := http.Post("https://localhost:9101/orders", "application/json", bytes.NewBuffer(jsonData))
+	response, err := http.Post("http://localhost:9001/orders", "application/json", bytes.NewBuffer(jsonData))
 
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -113,7 +112,7 @@ func parseStruct(data []string) (*api.Order, error) {
 	phoneNumber := strings.TrimSpace(data[2])
 	parcelWeight, err := strconv.ParseFloat(strings.TrimSpace(data[3]), 32)
 	if err != nil {
-		fmt.Println(err, "when parsing", data[3])
+		return nil, err
 	}
 
 	year, month, day := time.Now().Date()
