@@ -1,0 +1,20 @@
+version: '3.9'
+services:
+  csvpersist:
+    image: victorprado99/poc-csv-persistence
+    tty: true
+    ports:
+      - 9001:9001
+    restart: on-failure
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: csv_persistence
+    ports:
+      - "3306:3306"

@@ -111,8 +111,15 @@ func callPersistenceApi(orders []*api.Order) error {
 	if err != nil {
 		return err
 	}
+
+	persistenceUrl := os.Getenv("PERSIST_URL")
+
+	if persistenceUrl == "" {
+		persistenceUrl = "http://localhost:9001"
+	}
+
 	// Do the POST Request
-	response, err := http.Post("http://localhost:9001/orders", "application/json", bytes.NewBuffer(jsonData))
+	response, err := http.Post(persistenceUrl+"/orders", "application/json", bytes.NewBuffer(jsonData))
 
 	// Return generic error
 	if err != nil {
