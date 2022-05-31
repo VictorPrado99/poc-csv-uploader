@@ -9,8 +9,6 @@ services:
       - PERSIST_URL=http://csvpersist:9100
     ports:
       - 9100:9100
-    networks:
-      - host
 
   csvpersist:
     image: victorprado99/poc-csv-persistence
@@ -20,8 +18,6 @@ services:
     restart: on-failure
     depends_on:
       - mysql
-    networks:
-      - host
 
   mysql:
     image: mysql
@@ -32,6 +28,4 @@ services:
       MYSQL_DATABASE: csv_persistence
     ports:
       - "3306:3306"
-    networks:
-      - host
   
