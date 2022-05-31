@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+
+  app:
+    image: victorprado99/poc-csv-uploader
+    tty: true
+    environment:
+      - CSV_UPLOAD_PORT=9100
+      - PERSIST_URL=http://csvpersist:9100
+    ports:
+      - 9100:9100
+    networks:
+      - host
+
+  csvpersist:
+    image: victorprado99/poc-csv-persistence
+    tty: true
+    ports:
+      - 9001:9001
+    restart: on-failure
+    depends_on:
+      - mysql
+    networks:
+      - host
+
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: csv_persistence
+    ports:
+      - "3306:3306"
+    networks:
+      - host
+  
