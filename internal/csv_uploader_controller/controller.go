@@ -67,6 +67,9 @@ func uploadCsv(w http.ResponseWriter, r *http.Request) {
 
 	go logic.ProcessCsv(tempFile)
 
+	//Return accepted
+	w.WriteHeader(http.StatusAccepted)
+
 	// return that we have successfully uploaded our file!
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
