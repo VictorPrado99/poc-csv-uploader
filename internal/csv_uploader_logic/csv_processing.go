@@ -147,7 +147,8 @@ func parseStruct(data []string) (*api.Order, error) {
 	}
 
 	year, month, day := time.Now().Date()
-	date := strconv.Itoa(year) + "-" + month.String() + "-" + strconv.Itoa(day)
+	monthStr := strconv.Itoa(int(month))
+	date := strconv.Itoa(year) + "-" + monthStr + "-" + strconv.Itoa(day)
 
 	country, err := getCountry(phoneNumber)
 

@@ -1,31 +1,17 @@
-# Start from golang base image
-FROM golang:alpine as builder
+FROM golang:1.18
 
-# Add Maintainer info
-LABEL maintainer="VictorPrado99"
+ENV CSV_UPLOAD_PORT="9100"
+ENV PERSIST_URL="http://localhost:9001"
 
-# Install git.
-# Git is required for fetching the dependencies.
-RUN apk update && apk add --no-cache git && apk add --no-cach bash && apk add build-base
+WORKDIR /usr/src/app
 
-# Setup folders
-RUN mkdir /app
-WORKDIR /app
+# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 
-# Copy the source from the current directory to the working Directory inside the container
-COPY . .
+COPY . /usr/src/app
+RUN go build -v -o /usr/local/bin/app
 
-# Download all the dependencies
-RUN go get -d -v ./...
-
-# Install the package
-RUN go install -v ./...
-
-# Build the Go app
-RUN go build -o /build
-
-# Expose port 9100 to the outside world
 EXPOSE 9100
 
-# Run the executable
-CMD [ "/build" ]
+CMD ["app"]

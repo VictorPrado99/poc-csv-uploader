@@ -1,18 +1,16 @@
-version: '3.9'
+version: '3'
 services:
 
   app:
     image: victorprado99/poc-csv-uploader
-    tty: true
     environment:
       - CSV_UPLOAD_PORT=9100
       - PERSIST_URL=http://csvpersist:9100
     ports:
-      - 9100:9100
+      - "9100:9100"
 
   csvpersist:
     image: victorprado99/poc-csv-persistence
-    tty: true
     ports:
       - 9001:9001
     restart: on-failure

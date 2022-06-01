@@ -13,7 +13,7 @@ func ServiceStart(port string) {
 	router := controller.SetupRoutes()
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         "127.0.0.1:" + port,
+		Addr:         "0.0.0.0:" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
