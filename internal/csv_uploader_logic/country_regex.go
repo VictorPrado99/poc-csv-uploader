@@ -4,7 +4,9 @@ import "regexp"
 
 var countriesRegex map[string]regexp.Regexp
 
-// init the dictionary of regex, who will be used to determine the country based on phone number
+// init the dictionary of regex when the package is initialize. That way, the regex won't slow down the system, because will be compiled just once.
+// This dicstionary will be used to determine the country based on phone number
+// To create new countries, is necessary just add a new reference and the regex
 func init() {
 	countriesRegex = make(map[string]regexp.Regexp)
 
