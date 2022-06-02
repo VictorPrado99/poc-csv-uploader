@@ -18,6 +18,7 @@ import (
 )
 
 func ProcessCsv(tempFile *os.File) {
+	defer os.Remove(tempFile.Name()) // Remove when finish
 
 	orders := DoCsvProcess(tempFile)
 
@@ -37,7 +38,6 @@ func ProcessCsv(tempFile *os.File) {
 func DoCsvProcess(tempFile *os.File) []*api.Order {
 	tempFile, _ = os.Open(tempFile.Name()) //Open the temp file
 	defer tempFile.Close()                 // Close when finish
-	defer os.Remove(tempFile.Name())       // Remove when finis
 
 	fcsv := csv.NewReader(tempFile)     //Start the csv reader
 	numWps := 100                       // Number of worker, can be higher if you want more paralellism
